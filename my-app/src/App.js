@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 import EventList from './EventList.js'
-//static info
-import { githubEvents } from './hw-events.js';
 
 const forkStructure = {
   id: "",
@@ -77,22 +75,29 @@ class App extends Component {
   }
 
   componentDidMount() {
-    //fetch
-    this.setState({...this.props.eventFilter.reduce((accumulator, currentVal) =>
-      ({
-      ...accumulator,
-      [currentVal.githubEventName]: {
-        ...currentVal,
-        data: this.props.destructureEvents(githubEvents, currentVal.mapCallback, currentVal.githubEventName, currentVal.dataStructure)
-      }
-    }), {})});
-    //separate state setting for decoupling
-    try {
-      this.setState({val: this.props.eventFilter[0].githubEventName});
-    } catch (err) {
-      //for troubleshooting
-      console.error("eventFilter is an empty array.", err);
-    }
+    fetch(`https://api.github.com/users/${this.props.username}/events`)
+      .then((response) => (response.status === 200) ? response.json()
+        : Promise.reject("Status", response.status))
+      .then((githubJSON) => {
+        this.setState({...this.props.eventFilter.reduce((accumulator, currentVal) =>
+          ({
+          ...accumulator,
+          [currentVal.githubEventName]: {
+            ...currentVal,
+            data: this.props.destructureEvents(githubJSON, currentVal.mapCallback,
+              currentVal.githubEventName, currentVal.dataStructure)
+          }
+        }), {})});
+      }).then(() => {
+        //separate state-setting for decoupling + because setState is async
+        //leading this.state.val to have a value before
+        //the data is populated in the function above
+        try {
+          this.setState({val: this.props.eventFilter[0].githubEventName});
+        } catch (err) {
+          console.error("eventFilter is an empty array.", err);
+        }
+      }).catch((error) => console.error("Fetch error.", error));
   }
 
   unselect = (name) => {
@@ -101,10 +106,11 @@ class App extends Component {
 
   render() {
     let val = this.state.val;
-    let eventVal = this.state[val];
+    let eventVal = val ? this.state[val] : null;
 
     return (
       <div>
+        <h1>{`${this.props.username}'s Github account`}</h1>
         {this.props.eventFilter.map((element) =>
           [<input type="radio"
             checked={val=== element.githubEventName}
@@ -117,12 +123,10 @@ class App extends Component {
           eventListInfo={eventVal.data}
           caption={eventVal.caption}
           structure={eventVal.dataStructure} /> :
-        "Waiting for information from Github"}
+        <div>Waiting for information from Github</div>}
       </div>
     );
   }
 }
-
-/**/
 
 export default App;
