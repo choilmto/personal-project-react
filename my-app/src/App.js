@@ -2,82 +2,22 @@ import React, { Component } from 'react';
 import './App.css';
 import EventList from './EventList.js'
 
-const forkStructure = {
-  id: "",
-  repo: "",
-  baseURL: "",
-  timestamp: ""
-}
-
-const PRStructure = {
-  id: "",
-  title: "",
-  link: "",
-  status: "",
-  timestamp: ""
-}
-
-const mapFork = (structure, element) =>
-  ({
-    ...structure,
-    id: element.id,
-    repo: element.repo.name,
-    baseURL: element.repo.url,
-    timestamp: element.created_at
-  })
-
-const mapPR = (structure, element) =>
-  ({
-    ...structure,
-    id: element.id,
-    title: element.payload.pull_request.title,
-    link: element.payload.pull_request.html_url,
-    status: element.payload.action,
-    timestamp: element.created_at
-  })
-
-export const destructureEvents = (eventArr, mapCallback, type, structure) =>
-  eventArr
-    .filter((element) => element.type === type)
-    .map(mapCallback.bind(null, structure))
-    .sort((a, b) => {
-      if (a.timestamp < b.timestamp) {
-        return -1;
-      } else if (a.timestamp > b.timestamp) {
-        return 1;
-      }
-      return 0;}
-    )
-
-export const eventFilter = [
-  {
-    radioLabel: "Pull Requests",
-    githubEventName:"PullRequestEvent",
-    caption: "Recent Pull Requests",
-    mapCallback: mapPR,
-    dataStructure: PRStructure
-  },
-  {
-    radioLabel: "Forks",
-    githubEventName: "ForkEvent",
-    caption: "Recent Forks",
-    mapCallback: mapFork,
-    dataStructure: forkStructure
-  }
-]
-
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      val: ""
+      val: "",
+      username: "",
+      uncheckedUsername: "",
+      usernameMessage: ""
     };
   }
 
   componentDidMount() {
-    fetch(`https://api.github.com/users/${this.props.username}/events`)
+    console.log("hi");
+    fetch(`https://api.github.com/users/${this.state.username}/events`)
       .then((response) => (response.status === 200) ? response.json()
-        : Promise.reject("Status", response.status))
+        : Promise.reject(`Status: ${response.status}`))
       .then((githubJSON) => {
         this.setState({...this.props.eventFilter.reduce((accumulator, currentVal) =>
           ({
@@ -104,29 +44,68 @@ class App extends Component {
     this.setState({val: name});
   }
 
+  handleButton = () => {
+    //check username validity
+    fetch(`https://api.github.com/users/${this.state.uncheckedUsername}`)
+      .then((response) => (response.status === 200) ? response.json()
+        : Promise.reject(`Status ${response.status}`))
+      .then((response) => {
+        this.setState((prevState) => ({
+          username: prevState.uncheckedUsername,
+          uncheckedUsername: "",
+          usernameMessage: ""
+        }))
+      }).catch((err) => {
+        console.error(err);
+        this.setState({usernameMessage: "Username does not exist"})
+      });
+  }
+
+  handleTyping = (e) => {
+    this.setState({uncheckedUsername: e.target.value});
+  }
+
   render() {
     let val = this.state.val;
     let eventVal = val ? this.state[val] : null;
+    console.log(val);
 
     return (
       <div>
-        <h1>{`${this.props.username}'s Github account`}</h1>
-        {this.props.eventFilter.map((element) =>
-          [<input type="radio"
-            checked={val=== element.githubEventName}
-            onChange={this.unselect.bind(this, element.githubEventName)}>
-          </input>,
-          <label>{element.radioLabel}</label>
-        ])}
+        {this.state.username ?
+          <div>
+            <h1>{`${this.state.username}'s Github account`}</h1>
+            {this.props.eventFilter.map((element) =>
+              [<input type="radio"
+                checked={val=== element.githubEventName}
+                onChange={this.unselect.bind(this, element.githubEventName)}>
+              </input>,
+              <label>{element.radioLabel}</label>
+            ])}
 
-        {val ? <EventList
-          eventListInfo={eventVal.data}
-          caption={eventVal.caption}
-          structure={eventVal.dataStructure} /> :
-        <div>Waiting for information from Github</div>}
+            {val ? <EventList
+              eventListInfo={eventVal.data}
+              caption={eventVal.caption}
+              structure={eventVal.dataStructure} /> :
+            <div>Waiting for information from Github</div>}
+          </div> :
+          <div>
+            <label>{this.state.usernameMessage ||
+               'Please enter your Github username'}</label>
+            <input type="text" onChange={this.handleTyping}/>
+            <input type="button" onClick={this.handleButton} value="Submit"/>
+          </div>
+        }
       </div>
     );
   }
 }
 
 export default App;
+
+//questions: curry vs bind
+/*
+
+
+
+*/
