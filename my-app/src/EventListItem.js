@@ -8,7 +8,7 @@ const EventListItem = ({ eventInfo }) =>
           {
             switch(index) {
             case 0:
-            return <th scope="row">{element}</th>;
+              return <th scope="row">{element}</th>;
             default:
               return <td>{element}</td>
             }

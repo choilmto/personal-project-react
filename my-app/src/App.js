@@ -21,90 +21,103 @@ const PRStructure = {
   timestamp: ""
 }
 
-const mapFork = (element) => ({
-  ...forkStructure,
+const mapFork = (structure, element) => ({
+  ...structure,
   id: element.id,
   repo: element.repo.name,
   baseURL: element.repo.url,
-  timestamp: element.created_at
+  timestamp: new Date(element.created_at)
 })
 
-const mapPR = (element) => ({
-  ...PRStructure,
+const mapPR = (structure, element) => ({
+  ...structure,
   id: element.id,
   title: element.payload.pull_request.title,
   link: element.payload.pull_request.html_url,
   status: element.payload.action,
-  timestamp: element.created_at
+  timestamp: new Date(element.created_at)
 })
 
-//PullRequestEvent or ForkEvent
-const destructureEvents = (eventArr, mapCallback, type) =>
+//export
+const destructureEvents = (eventArr, mapCallback, type, structure) =>
   eventArr
   .filter((element) => element.type === type)
-  .map(mapCallback)
-  .sort((a, b) => Date(a.timestamp) - Date(b.timestamp));
+  .map(mapCallback.bind(null, structure))
+  .sort((a, b) => a.timestamp - b.timestamp)
+  .map((element) => ({...element, timestamp: element.timestamp.toString()}))
+
+//export
+//must never be empty
+const eventFilter = [
+  {
+    radioLabel: "Pull Requests",
+    githubEventName:"PullRequestEvent",
+    caption: "Recent Pull Requests",
+    mapCallback: mapPR,
+    dataStructure: PRStructure
+  },
+  {
+    radioLabel: "Forks",
+    githubEventName: "ForkEvent",
+    caption: "Recent Forks",
+    mapCallback: mapFork,
+    dataStructure: forkStructure
+  }
+]
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      radioChoiceOnFork: false,
-      pullRequests: [],
-      forks: []
+      val: ""
     };
   }
 
   componentDidMount() {
     //fetch
-    this.setState({
-      pullRequests: destructureEvents(githubEvents, mapPR, "PullRequestEvent"),
-      forks: destructureEvents(githubEvents, mapFork, "ForkEvent")
-    });
+    this.setState({...eventFilter.reduce((accumulator, currentVal) =>
+      ({
+      ...accumulator,
+      [currentVal.githubEventName]: {
+        ...currentVal,
+        data: destructureEvents(githubEvents, currentVal.mapCallback, currentVal.githubEventName, currentVal.dataStructure)
+      }
+    }), {})});
+    //separate state setting for decoupling
+    try {
+      this.setState({val: eventFilter[0].githubEventName});
+    } catch (err) {
+      //for troubleshooting
+      console.error("eventFilter is an empty array.", err);
+    }
   }
 
-  unselect = () => {
-    this.setState({radioChoiceOnFork: !this.state.radioChoiceOnFork});
+  unselect = (name) => {
+    this.setState({val: name});
   }
 
   render() {
-    /*return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );*/
+    let temp = this.state[this.state.val];
     return (
       <div>
-        <input type="radio"
-        checked={!this.state.radioChoiceOnFork}
-        onChange={this.unselect}>
-        </input>
-        <label>Pull request</label>
-        <input type="radio"
-        checked={this.state.radioChoiceOnFork}
-        onChange={this.unselect}>
-        </input>
-        <label>Fork</label>
+        {eventFilter.map((element) =>
+          [<input type="radio"
+            checked={this.state.val === element.githubEventName}
+            onChange={this.unselect.bind(this, element.githubEventName)}>
+          </input>,
+          <label>{element.radioLabel}</label>
+        ])}
 
-        {this.state.radioChoiceOnFork ?
-          <EventList eventListInfo={this.state.forks} caption={"Recent Forks"} structure={forkStructure} /> :
-          <EventList eventListInfo={this.state.pullRequests} caption={"Recent Pull Requests"} structure={PRStructure} />}
+        {this.state.val ? <EventList
+          eventListInfo={temp.data}
+          caption={temp.caption}
+          structure={temp.dataStructure} /> :
+        "Waiting for information from Github"}
       </div>
     );
   }
 }
+
+/**/
 
 export default App;

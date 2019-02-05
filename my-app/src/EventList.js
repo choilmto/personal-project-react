@@ -14,7 +14,8 @@ const EventList = ({ eventListInfo, caption, structure }) =>
         {eventListInfo.map(element => <EventListItem eventInfo={element}/>)}
       </tbody>
     </table>
-  )
+  );
+
 
 
 export default EventList;
