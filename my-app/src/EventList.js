@@ -11,7 +11,7 @@ const EventList = ({ eventListInfo, caption, structure }) =>
         </tr>
       </thead>
       <tbody>
-        {eventListInfo.map(element => <EventListItem eventInfo={element}/>)}
+        {eventListInfo.map(element => <EventListItem eventInfo={element} structure={structure} />)}
       </tbody>
     </table>
   );
