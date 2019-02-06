@@ -7,7 +7,8 @@ const EventList = ({ eventListInfo, caption, structure }) =>
       <caption>{caption}</caption>
       <thead>
         <tr>
-          {Object.keys(structure).map(element => <th scope="col">{element[0].toUpperCase() + element.slice(1)}</th>)}
+          {Object.keys(structure).map(element =>
+            <th scope="col">{element[0].toUpperCase() + element.slice(1)}</th>)}
         </tr>
       </thead>
       <tbody>
@@ -15,7 +16,5 @@ const EventList = ({ eventListInfo, caption, structure }) =>
       </tbody>
     </table>
   );
-
-
 
 export default EventList;

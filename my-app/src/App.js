@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
-import EventList from './EventList.js'
+import { Display } from './Display';
+import { Login } from './Login';
 
 class App extends Component {
   constructor(props) {
@@ -8,18 +9,26 @@ class App extends Component {
     this.state = {
       val: "",
       username: "",
-      uncheckedUsername: "",
       usernameMessage: ""
     };
   }
 
   componentDidMount() {
-    console.log("hi");
-    fetch(`https://api.github.com/users/${this.state.username}/events`)
-      .then((response) => (response.status === 200) ? response.json()
-        : Promise.reject(`Status: ${response.status}`))
-      .then((githubJSON) => {
-        this.setState({...this.props.eventFilter.reduce((accumulator, currentVal) =>
+    try {
+      this.setState({val: this.props.eventFilter[0].githubEventName});
+    } catch (err) {
+      console.error("eventFilter is an empty array.", err);
+    }
+  }
+
+  getUsername = (username) => {
+    fetch(`https://api.github.com/users/${username}/events`)
+      .then((response) => (response.status === 200) ?
+        response.json() : Promise.reject(`Status: ${response.status}`)
+      ).then((githubJSON) => {
+        this.setState({
+          username: username,
+          ...this.props.eventFilter.reduce((accumulator, currentVal) =>
           ({
           ...accumulator,
           [currentVal.githubEventName]: {
@@ -28,73 +37,29 @@ class App extends Component {
               currentVal.githubEventName, currentVal.dataStructure)
           }
         }), {})});
-      }).then(() => {
-        //separate state-setting for decoupling + because setState is async
-        //leading this.state.val to have a value before
-        //the data is populated in the function above
-        try {
-          this.setState({val: this.props.eventFilter[0].githubEventName});
-        } catch (err) {
-          console.error("eventFilter is an empty array.", err);
-        }
-      }).catch((error) => console.error("Fetch error.", error));
+      }).catch((error) => {
+        console.error("Fetch error.", error);
+        this.setState({usernameMessage: "Check username"});
+      });
   }
 
   unselect = (name) => {
     this.setState({val: name});
   }
 
-  handleButton = () => {
-    //check username validity
-    fetch(`https://api.github.com/users/${this.state.uncheckedUsername}`)
-      .then((response) => (response.status === 200) ? response.json()
-        : Promise.reject(`Status ${response.status}`))
-      .then((response) => {
-        this.setState((prevState) => ({
-          username: prevState.uncheckedUsername,
-          uncheckedUsername: "",
-          usernameMessage: ""
-        }))
-      }).catch((err) => {
-        console.error(err);
-        this.setState({usernameMessage: "Username does not exist"})
-      });
-  }
-
-  handleTyping = (e) => {
-    this.setState({uncheckedUsername: e.target.value});
-  }
-
   render() {
-    let val = this.state.val;
-    let eventVal = val ? this.state[val] : null;
-    console.log(val);
-
+    let state = this.state;
     return (
       <div>
-        {this.state.username ?
-          <div>
-            <h1>{`${this.state.username}'s Github account`}</h1>
-            {this.props.eventFilter.map((element) =>
-              [<input type="radio"
-                checked={val=== element.githubEventName}
-                onChange={this.unselect.bind(this, element.githubEventName)}>
-              </input>,
-              <label>{element.radioLabel}</label>
-            ])}
-
-            {val ? <EventList
-              eventListInfo={eventVal.data}
-              caption={eventVal.caption}
-              structure={eventVal.dataStructure} /> :
-            <div>Waiting for information from Github</div>}
-          </div> :
-          <div>
-            <label>{this.state.usernameMessage ||
-               'Please enter your Github username'}</label>
-            <input type="text" onChange={this.handleTyping}/>
-            <input type="button" onClick={this.handleButton} value="Submit"/>
-          </div>
+        {state.username ?
+          <Display username={state.username}
+            eventFilter={this.props.eventFilter}
+            unselect={this.unselect}
+            val={state.val}
+            eventVal={state[state.val]}
+          /> :
+          <Login getUsername={this.getUsername}
+            usernameMessage={state.usernameMessage}/>
         }
       </div>
     );
@@ -102,10 +67,3 @@ class App extends Component {
 }
 
 export default App;
-
-//questions: curry vs bind
-/*
-
-
-
-*/
