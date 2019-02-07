@@ -21,26 +21,24 @@ class App extends Component {
     }
   }
 
+  handleFetchError = (response, msg) => {
+    if (!response.ok) {
+      this.setState({usernameMessage: msg});
+      throw Error(response.statusText);
+    }
+  }
+
   getUsername = (username) => {
     fetch(`https://api.github.com/users/${username}/events`)
       .then((response) => {
-        if (!response.ok) {
-          this.setState({usernameMessage: "Check username"});
-          throw Error(response.statusText);
-        }
+        this.handleFetchError(response, "Check username");
         return response.json();
       }).then((githubJSON) => {
         this.setState({
           username: username,
-          ...this.props.eventFilter.reduce((accumulator, currentVal) =>
-          ({
-          ...accumulator,
-          [currentVal.githubEventName]: {
-            ...currentVal,
-            data: this.props.destructureEvents(githubJSON, currentVal.mapCallback,
-              currentVal.githubEventName, currentVal.dataStructure)
-          }
-        }), {})});
+          ...this.props.eventFilter.reduce(
+            this.props.reduceCallback.bind(
+              null, githubJSON, this.props.destructureEvents), {})});
       }).catch((error) => {
         console.error("Fetch error.", error);
       });

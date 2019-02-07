@@ -32,6 +32,16 @@ const mapPR = (structure, element) =>
     timestamp: element.created_at
   })
 
+export const reduceCallback = (githubJSON, destructureEvents, accumulator, currentVal) =>
+  ({
+    ...accumulator,
+    [currentVal.githubEventName]: {
+      ...currentVal,
+      data: destructureEvents(githubJSON, currentVal.mapCallback,
+        currentVal.githubEventName, currentVal.dataStructure)
+    }
+  })
+
 export const destructureEvents = (eventArr, mapCallback, type, structure) =>
   eventArr
     .filter((element) => element.type === type)
