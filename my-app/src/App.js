@@ -23,9 +23,13 @@ class App extends Component {
 
   getUsername = (username) => {
     fetch(`https://api.github.com/users/${username}/events`)
-      .then((response) => (response.status === 200) ?
-        response.json() : Promise.reject(`Status: ${response.status}`)
-      ).then((githubJSON) => {
+      .then((response) => {
+        if (!response.ok) {
+          this.setState({usernameMessage: "Check username"});
+          throw Error(response.statusText);
+        }
+        return response.json();
+      }).then((githubJSON) => {
         this.setState({
           username: username,
           ...this.props.eventFilter.reduce((accumulator, currentVal) =>
@@ -39,7 +43,6 @@ class App extends Component {
         }), {})});
       }).catch((error) => {
         console.error("Fetch error.", error);
-        this.setState({usernameMessage: "Check username"});
       });
   }
 

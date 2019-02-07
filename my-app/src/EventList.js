@@ -12,7 +12,15 @@ const EventList = ({ eventListInfo, caption, structure }) =>
         </tr>
       </thead>
       <tbody>
-        {eventListInfo.map(element => <EventListItem eventInfo={element} structure={structure} />)}
+        {(eventListInfo.length > 0) ?
+          eventListInfo.map(element =>
+            <EventListItem eventInfo={element} structure={structure} />) :
+          <tr>
+            <td>
+              No {caption}
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   );
