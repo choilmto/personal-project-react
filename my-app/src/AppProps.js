@@ -12,7 +12,7 @@ const mapPR = (element) =>
     id: element.id,
     title: element.payload.pull_request.title,
     link: element.payload.pull_request.html_url,
-    JSONUrl: element.payload.pull_request.url
+JSONUrl: `${element.payload.pull_request.url}`
   })
 
 const formatFork = item => <a href={item.baseUrl} target="_blank">{item.repo}</a>;

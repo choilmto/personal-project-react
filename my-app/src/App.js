@@ -29,22 +29,23 @@ class App extends Component {
     }
   }
 
+  convertStringToFetch = (url) =>
+    fetch(url)
+    .then(response => {
+      this.handleFetchError(response, "Check username");
+      return response.json();})
+    .catch(error => console.error("Fetch error.", error))
+
   setUsername = username => {
     //returns a promise with an array of values
     Promise.all([
       `https://api.github.com/users/${username}/events`,
-      `https://api.github.com/users/${username}/repos`
-    ].map(element =>
-      fetch(element)
-        .then(response => {
-          this.handleFetchError(response, "Check username");
-          return response.json();
-        }).catch(error => console.error("Fetch error.", error))
-      )).then(responseArr => {
-
-      //destructure events endpoint for each event
+      `https://api.github.com/users/${username}/repos?`
+    ].map(element => this.convertStringToFetch(element)))
+    .then(responseArr => {
+    //destructure events endpoint for each event
       let events = this.props.eventFilter.reduce(reduceCallback.bind(
-        null, responseArr[0], destructureEvents), {});
+        null, responseArr[0], destructureEvents), {ForkEvent: null, PullRequestEvent: null});
 
       //destructure repos endpoint for each event
       if(events.ForkEvent.data.length === 0) {
@@ -53,20 +54,15 @@ class App extends Component {
       }
 
       //fetch all pull requests listed and mutate events object
-      Promise.all(events.PullRequestEvent.data.map(element =>
-        fetch(element.JSONUrl)
-          .then(response => {
-            this.handleFetchError(response, "Check username");
-            return response.json();
-        }).catch(error => console.error("Fetch error.", error))
-      )).then(response => {
+      Promise.all(events.PullRequestEvent.data.map(element => this.convertStringToFetch(element)))
+      .then(response => {
         events.PullRequestEvent.data.forEach((element, index) =>
-         element.status = response[index].state);
-       this.setState({
-         username: username,
-         ...events
-       });
-     });
+          element.status = response[index].state);
+        this.setState({
+          username: username,
+          ...events
+        });
+      });
     });
   }
 
