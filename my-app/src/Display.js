@@ -11,10 +11,13 @@ const Display = ({ username, eventFilter, unselect, val, eventVal }) =>
         val={val}
       />
 
-      <EventList
-        eventListInfo={eventVal.data}
-        caption={eventVal.caption}
-        structure={eventVal.dataStructure} />
+      {eventVal ?
+        <EventList
+          eventListInfo={eventVal.data}
+          title={eventVal.title}
+          format={eventVal.format}/>:
+        <div>Waiting for information from Github</div>
+      }
     </div>
   );
 

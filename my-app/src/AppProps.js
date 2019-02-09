@@ -1,36 +1,24 @@
-const forkStructure = {
-  id: "",
-  repo: "",
-  baseURL: "",
-  timestamp: ""
-}
+import React from 'react';
 
-const PRStructure = {
-  id: "",
-  title: "",
-  link: "",
-  status: "",
-  timestamp: ""
-}
-
-const mapFork = (structure, element) =>
+const mapFork = (element) =>
   ({
-    ...structure,
     id: element.id,
-    repo: element.repo.name,
-    baseURL: element.repo.url,
-    timestamp: element.created_at
+    repo: element.repo.name.split("/")[1],
+    baseUrl: `https://github.com/${element.repo.name}`
   })
 
-const mapPR = (structure, element) =>
+const mapPR = (element) =>
   ({
-    ...structure,
     id: element.id,
     title: element.payload.pull_request.title,
     link: element.payload.pull_request.html_url,
-    status: element.payload.action,
-    timestamp: element.created_at
+    JSONUrl: element.payload.pull_request.url
   })
+
+const formatFork = item => <a href={item.baseUrl} target="_blank">{item.repo}</a>;
+
+const formatPR = item => <a href={item.link} target="_blank">
+  {`${item.status[0].toUpperCase()} ${item.title}`}</a>
 
 export const reduceCallback = (githubJSON, destructureEvents, accumulator, currentVal) =>
   ({
@@ -38,36 +26,28 @@ export const reduceCallback = (githubJSON, destructureEvents, accumulator, curre
     [currentVal.githubEventName]: {
       ...currentVal,
       data: destructureEvents(githubJSON, currentVal.mapCallback,
-        currentVal.githubEventName, currentVal.dataStructure)
+        currentVal.githubEventName)
     }
   })
 
-export const destructureEvents = (eventArr, mapCallback, type, structure) =>
+export const destructureEvents = (eventArr, mapCallback, type) =>
   eventArr
     .filter((element) => element.type === type)
-    .map(mapCallback.bind(null, structure))
-    .sort((a, b) => {
-      if (a.timestamp < b.timestamp) {
-        return -1;
-      } else if (a.timestamp > b.timestamp) {
-        return 1;
-      }
-      return 0;}
-    )
+    .map(mapCallback)
 
 export const eventFilter = [
   {
     radioLabel: "Pull Requests",
     githubEventName:"PullRequestEvent",
-    caption: "Recent Pull Requests",
+    title: "Recent Pull Requests",
     mapCallback: mapPR,
-    dataStructure: PRStructure
+    format: formatPR
   },
   {
     radioLabel: "Forks",
     githubEventName: "ForkEvent",
-    caption: "Recent Forks",
+    title: "Recent Forks",
     mapCallback: mapFork,
-    dataStructure: forkStructure
+    format: formatFork
   }
 ]

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
+import { reduceCallback, destructureEvents } from './AppProps';
 
 class App extends Component {
   constructor(props) {
@@ -28,23 +29,48 @@ class App extends Component {
     }
   }
 
-  getUsername = (username) => {
-    fetch(`https://api.github.com/users/${username}/events`)
-      .then((response) => {
-        this.handleFetchError(response, "Check username");
-        return response.json();
-      }).then((githubJSON) => {
-        this.setState({
-          username: username,
-          ...this.props.eventFilter.reduce(
-            this.props.reduceCallback.bind(
-              null, githubJSON, this.props.destructureEvents), {})});
-      }).catch((error) => {
-        console.error("Fetch error.", error);
-      });
+  setUsername = username => {
+    //returns a promise with an array of values
+    Promise.all([
+      `https://api.github.com/users/${username}/events`,
+      `https://api.github.com/users/${username}/repos`
+    ].map(element =>
+      fetch(element)
+        .then(response => {
+          this.handleFetchError(response, "Check username");
+          return response.json();
+        }).catch(error => console.error("Fetch error.", error))
+      )).then(responseArr => {
+
+      //destructure events endpoint for each event
+      let events = this.props.eventFilter.reduce(reduceCallback.bind(
+        null, responseArr[0], destructureEvents), {});
+
+      //destructure repos endpoint for each event
+      if(events.ForkEvent.data.length === 0) {
+        events.ForkEvent.data = responseArr[1].filter(element => element.fork)
+          .map((element) => element.name);
+      }
+
+      //fetch all pull requests listed and mutate events object
+      Promise.all(events.PullRequestEvent.data.map(element =>
+        fetch(element.JSONUrl)
+          .then(response => {
+            this.handleFetchError(response, "Check username");
+            return response.json();
+        }).catch(error => console.error("Fetch error.", error))
+      )).then(response => {
+        events.PullRequestEvent.data.forEach((element, index) =>
+         element.status = response[index].state);
+       this.setState({
+         username: username,
+         ...events
+       });
+     });
+    });
   }
 
-  unselect = (name) => {
+  unselect = name => {
     this.setState({val: name});
   }
 
@@ -59,7 +85,7 @@ class App extends Component {
             val={state.val}
             eventVal={state[state.val]}
           /> :
-          <Login getUsername={this.getUsername}
+          <Login setUsername={this.setUsername}
             usernameMessage={state.usernameMessage}/>
         }
       </div>

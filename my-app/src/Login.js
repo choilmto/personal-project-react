@@ -24,7 +24,7 @@ class Login extends Component {
            'Please enter your Github username'}</label>
         <input type="text" onChange={this.handleTyping}/>
         <input type="button" onClick={() =>
-          this.props.getUsername(this.state.uncheckedUsername)} value="Submit"/>
+          this.props.setUsername(this.state.uncheckedUsername)} value="Submit"/>
       </div>
     );
   }
