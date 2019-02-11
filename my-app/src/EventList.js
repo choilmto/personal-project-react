@@ -1,18 +1,16 @@
 import React from "react";
-import { eventFilter } from 'AppProps';
+import { eventFilter } from './AppProps';
 
-const EventList = () =>
+const EventList = ({ selection, events }) =>
   {
-    let currentDisplay = this.props.display.selection;
-    let title = eventFilter[currentDisplay].title;
-    let format = eventFilter[currentDisplay].format;
-    let eventListInfo = this.props.events[currentDisplay];
+    let settings = eventFilter.find(element => element.githubEventName === selection);
+    let eventListInfo = events[selection];
     return (
       <div>
-        <h2>{title}</h2>
+        <h2>{settings.title}</h2>
         {(eventListInfo === 0) ?
-          <div>No {title}</div> :
-          eventListInfo.map(element => <div>{format(element)}</div>)
+          <div>No {settings.title}</div> :
+          eventListInfo.map(element => <div>{settings.format(element)}</div>)
         }
       </div>
     );

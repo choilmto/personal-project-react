@@ -2,20 +2,25 @@ import React, { Component } from 'react';
 import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
-import { eventFilter } from './AppProps';
 
 class App extends Component {
   constructor(props) {
     super(props);
   }
-  
+
   render() {
+    let props = this.props;
+    let username = props.username;
     return (
-      let props = this.props;
       <div>
-        {props.username ?
-          <Display username={props.username}}/> :
-          <Login/>
+        {username ?
+          <Display username={username}
+            selection={props.selection}
+            setSelection={props.setSelection}
+            events={props.events}
+          /> :
+          <Login error={props.error}
+            handleButton={props.handleButton}/>
         }
       </div>
     );

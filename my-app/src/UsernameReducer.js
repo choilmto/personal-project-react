@@ -2,14 +2,14 @@ const FETCH_USERNAME_BEGIN = "FETCH_USERNAME_BEGIN";
 const FETCH_USERNAME_SUCCESS = "FETCH_USERNAME_SUCCESS";
 const FETCH_USERNAME_FAILURE = "FETCH_USERNAME_FAILURE";
 
-const fetchUsernameBegin = () => ({type: FETCH_USERNAME_BEGIN})
+export const fetchUsernameBegin = () => ({type: FETCH_USERNAME_BEGIN})
 
-const fetchUsernameSuccess = (username) => ({
+export const fetchUsernameSuccess = (username) => ({
   type: FETCH_USERNAME_SUCCESS,
   username
 })
 
-const fetchUsernameFailure = (error) => ({
+export const fetchUsernameFailure = (error) => ({
   type: FETCH_USERNAME_FAILURE,
   error
 })
@@ -20,7 +20,7 @@ const defaultState = {
   loading: false
 }
 
-const fetchUsernameReducer = (state = defaultState, action) {
+export const usernameReducer = (state = defaultState, action) => {
   switch(action.type) {
     case FETCH_USERNAME_BEGIN:
       return {

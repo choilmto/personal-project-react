@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import { rootReducer } from './RootReducer';
+import { setSelection } from './SelectionReducer';
+import { fetchDataThunk, fetchUsernameThunk } from './Thunks';
 import * as serviceWorker from './serviceWorker';
-import { createStore } from 'redux';
-import Provider, { connect } from 'react-redux';
-import { thunk } from 'redux-thunk';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider, connect } from 'react-redux';
+import thunk from 'redux-thunk';
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
@@ -21,6 +23,18 @@ const setData = () => {
 };
 
 const unsubscribe = store.subscribe(setData);
+
+const mapStateToProps = (state) => ({
+  username: state.user.username,
+  error: state.user.error,
+  selection: state.display.selection,
+  events: state.data.events
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  handleButton: (username) => dispatch(fetchUsernameThunk(username)),
+  setSelection: (selection) => dispatch(setSelection(selection))
+})
 
 const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);
 

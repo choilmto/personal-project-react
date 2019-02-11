@@ -1,16 +1,16 @@
-const FETCH_DATA_BEGINNING = "FETCH_DATA_BEGINNING";
+const FETCH_DATA_BEGIN = "FETCH_DATA_BEGIN";
 const FETCH_DATA_SUCCESS = "FETCH_DATA_SUCCESS";
 const FETCH_DATA_FAILURE = "FETCH_DATA_FAILURE";
 
-const fetchDataBeginning = () => ({
-  type: FETCH_DATA_BEGINNING
+export const fetchDataBegin = () => ({
+  type: FETCH_DATA_BEGIN
 })
-const fetchDataSuccess = events => ({
-  type: ACTION_FETCH_DATA_SUCCESS,
+export const fetchDataSuccess = events => ({
+  type: FETCH_DATA_SUCCESS,
   events
 })
-const fetchDataFailure = error => ({
-  type: ACTION_FETCH_DATA_FAILURE,
+export const fetchDataFailure = error => ({
+  type: FETCH_DATA_FAILURE,
   error
 })
 
@@ -20,9 +20,9 @@ const defaultState = {
   error: ""
 }
 
-const dataReducer = (state = defaultState, action) {
+export const dataReducer = (state = defaultState, action) => {
   switch(action.type) {
-    case FETCH_DATA_BEGINNING:
+    case FETCH_DATA_BEGIN:
       return {
         ...state,
         loading: true
@@ -31,13 +31,13 @@ const dataReducer = (state = defaultState, action) {
       return {
         ...state,
         loading: false,
-        events
+        events: action.events
       };
     case FETCH_DATA_FAILURE:
       return {
         ...state,
         loading: false,
-        error
+        error: action.error
       };
     default:
       return state;
