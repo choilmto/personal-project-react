@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { fetchUsernameThunk } from 'Thunks';
 
 class Login extends Component {
   constructor(props) {
@@ -20,11 +21,11 @@ class Login extends Component {
   render() {
     return (
       <div>
-        <label>{this.props.usernameMessage ||
+        <label>{this.props.user.error ||
            'Please enter your Github username'}</label>
         <input type="text" onChange={this.handleTyping}/>
         <input type="button" onClick={() =>
-          this.props.setUsername(this.state.uncheckedUsername)} value="Submit"/>
+          this.props.dispatch(fetchUsernameThunk(this.state.uncheckedUsername))} value="Submit"/>
       </div>
     );
   }

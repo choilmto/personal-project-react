@@ -2,20 +2,14 @@ import React from 'react';
 import EventList from './EventList';
 import { Selection } from './Selection';
 
-const Display = ({ username, eventFilter, unselect, val, eventVal }) =>
+const Display = ({ username, eventVal }) =>
   (
     <div>
       <h1>{`${username}'s Github account`}</h1>
-      <Selection eventFilter={eventFilter}
-        unselect={unselect}
-        val={val}
-      />
+      <ConnectedSelection />
 
-      {eventVal ?
-        <EventList
-          eventListInfo={eventVal.data}
-          title={eventVal.title}
-          format={eventVal.format}/>:
+      {this.props.events[this.props.selection] ?
+        <EventList /> :
         <div>Waiting for information from Github</div>
       }
     </div>

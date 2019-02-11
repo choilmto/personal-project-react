@@ -12,7 +12,7 @@ const mapPR = (element) =>
     id: element.id,
     title: element.payload.pull_request.title,
     link: element.payload.pull_request.html_url,
-JSONUrl: `${element.payload.pull_request.url}`
+    JSONUrl: `${element.payload.pull_request.url}`
   })
 
 const formatFork = item => <a href={item.baseUrl} target="_blank">{item.repo}</a>;
@@ -20,14 +20,12 @@ const formatFork = item => <a href={item.baseUrl} target="_blank">{item.repo}</a
 const formatPR = item => <a href={item.link} target="_blank">
   {`${item.status[0].toUpperCase()} ${item.title}`}</a>
 
-export const reduceCallback = (githubJSON, destructureEvents, accumulator, currentVal) =>
+export const getReduceCallback = (githubJSON) =>
+  (accumulator, currentVal) =>
   ({
     ...accumulator,
-    [currentVal.githubEventName]: {
-      ...currentVal,
-      data: destructureEvents(githubJSON, currentVal.mapCallback,
-        currentVal.githubEventName)
-    }
+    [currentVal.githubEventName]:  destructureEvents(githubJSON, currentVal.mapCallback,
+      currentVal.githubEventName)
   })
 
 export const destructureEvents = (eventArr, mapCallback, type) =>
