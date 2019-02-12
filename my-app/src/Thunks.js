@@ -1,4 +1,5 @@
-import { eventFilter, getReduceCallback, token } from './AppProps';
+import { token } from './AccessToken';
+import { eventFilter, getReduceCallback } from './AppProps';
 import { fetchDataBegin, fetchDataSuccess, fetchDataFailure } from './DataReducerAndActions';
 import { fetchUsernameBegin, fetchUsernameSuccess, fetchUsernameFailure } from './UsernameReducerAndActions';
 

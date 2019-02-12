@@ -22,7 +22,7 @@ const setData = () => {
   }
 };
 
-const unsubscribe = store.subscribe(setData);
+store.subscribe(setData);
 
 const mapStateToProps = (state) => ({
   username: state.user.username,

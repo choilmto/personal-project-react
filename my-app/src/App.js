@@ -3,30 +3,20 @@ import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    let props = this.props;
-    let username = props.username;
-
-    return (
-      <div>
-        {username ?
-          <Display username={username}
-            selection={props.selection}
-            setSelection={props.setSelection}
-            events={props.events}
-            handleClick={props.handleClick}
-          /> :
-          <Login error={props.error}
-            handleButton={props.handleButton}/>
-        }
-      </div>
-    );
-  }
-}
+const App = ({username, selection, setSelection, events, handleClick, error, handleButton}) =>
+ (
+    <div>
+      {username ?
+        <Display username={username}
+          selection={selection}
+          setSelection={setSelection}
+          events={events}
+          handleClick={handleClick}
+        /> :
+        <Login error={error}
+          handleButton={handleButton}/>
+      }
+    </div>
+  )
 
 export default App;
