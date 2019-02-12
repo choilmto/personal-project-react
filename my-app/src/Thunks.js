@@ -33,7 +33,7 @@ export const fetchDataThunk = (username) => {
     .then(responseArr => {
     //destructure events endpoint for each event
       let events = eventFilter
-        .reduce(getReduceCallback(responseArr[0]), {ForkEvent: null, PullRequestEvent: null});
+        .reduce(getReduceCallback(responseArr[0]), {});
 
       //destructure repos endpoint for each event
       if(events.ForkEvent.length === 0) {
