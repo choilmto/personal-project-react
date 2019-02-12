@@ -43,7 +43,7 @@ export const fetchDataThunk = (username) => {
       }
 
       //fetch all pull requests listed and mutate events object
-      return fetchEndpoints(events.PullRequestEvent
+      fetchEndpoints(events.PullRequestEvent
         .map(element => element.JSONUrl))
       .then(response => {
         events.PullRequestEvent = events.PullRequestEvent.map((element, index) => ({
