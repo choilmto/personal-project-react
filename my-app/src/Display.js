@@ -2,7 +2,7 @@ import React from 'react';
 import EventList from './EventList';
 import { Selection } from './Selection';
 
-const Display = ({ username, selection, setSelection, events }) =>
+const Display = ({ username, selection, setSelection, events, handleClick }) =>
   {
 
     return (
@@ -12,8 +12,11 @@ const Display = ({ username, selection, setSelection, events }) =>
           setSelection={setSelection}/>
 
         {events[selection] ?
-          <EventList selection={selection}
-            events={events}/>:
+          <div>
+            <EventList selection={selection}
+              events={events}/>
+            <button onClick={handleClick}>Press to see another user</button>
+          </div> :
           <div>Waiting for information from Github</div>
         }
       </div>

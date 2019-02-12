@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import { rootReducer } from './RootReducer';
+import { rootReducer, logout } from './RootReducer';
 import { setSelection } from './SelectionReducerAndActions';
 import { fetchDataThunk, fetchUsernameThunk } from './Thunks';
 import * as serviceWorker from './serviceWorker';
@@ -33,7 +33,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   handleButton: (username) => dispatch(fetchUsernameThunk(username)),
-  setSelection: (selection) => dispatch(setSelection(selection))
+  setSelection: (selection) => dispatch(setSelection(selection)),
+  handleClick: () => dispatch(logout())
 })
 
 const ConnectedApp = connect(mapStateToProps, mapDispatchToProps)(App);

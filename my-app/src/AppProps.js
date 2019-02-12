@@ -1,7 +1,7 @@
 import React from 'react';
 
 //for testing
-export const token = "";
+export const token = '';
 
 const mapFork = (element) =>
   ({

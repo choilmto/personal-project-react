@@ -11,7 +11,7 @@ class App extends Component {
   render() {
     let props = this.props;
     let username = props.username;
-    
+
     return (
       <div>
         {username ?
@@ -19,6 +19,7 @@ class App extends Component {
             selection={props.selection}
             setSelection={props.setSelection}
             events={props.events}
+            handleClick={props.handleClick}
           /> :
           <Login error={props.error}
             handleButton={props.handleButton}/>
