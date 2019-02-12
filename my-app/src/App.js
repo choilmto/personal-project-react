@@ -36,7 +36,7 @@ class App extends Component {
 
   setUsername = username  => {
      this.convertStringToFetch(`https://api.github.com/users/${username}${token}`)
-     .then(() => this.setState({username}))
+     .then(() => this.setState({usernameMessage: "", username}))
      .catch((error) => {
        this.setState({usernameMessage: "Check username"});
        console.error(error);
@@ -76,6 +76,14 @@ class App extends Component {
     this.setState({selection: name});
   }
 
+  handleClick = () => {
+    this.setState((prevState) => ({
+      username: "",
+      usernameMessage: "",
+      selection: this.props.eventFilter[0].githubEventName
+    }));
+  }
+
   render() {
     let state = this.state;
     let username = state.username;
@@ -86,6 +94,7 @@ class App extends Component {
             setData={this.setData}
             unselect={this.unselect}
             selection={state.selection}
+            handleClick={this.handleClick}
             eventListInfo={state[state.selection]}
           /> :
           <Login setUsername={this.setUsername}

@@ -22,9 +22,12 @@ class Display extends Component {
         />
 
         {props.eventListInfo ?
-          <EventList
-            eventListInfo={props.eventListInfo}
-            selection={props.selection}/>:
+          <div>
+            <EventList
+              eventListInfo={props.eventListInfo}
+              selection={props.selection}/>
+            <button onClick={props.handleClick}>Press to see another user</button>
+          </div> :
           <div>Waiting for information from Github</div>
         }
       </div>
