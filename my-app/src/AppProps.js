@@ -22,7 +22,7 @@ const formatFork = item =>
   <a href={item.baseUrl} target="_blank">{item.repo}</a>
 
 const formatPR = item => <a href={item.link} target="_blank">
-  {`${item.status[0].toUpperCase()} ${item.title}`}</a>
+  {`${item.title} (${item.status})`}</a>
 
 export const getReduceCallback = (githubJSON) =>
   (accumulator, currentVal) =>

@@ -10,7 +10,9 @@ const EventList = ({ selection, events }) =>
         <h2>{settings.title}</h2>
         {(eventListInfo === 0) ?
           <div>No {settings.title}</div> :
-          eventListInfo.map(element => <div>{settings.format(element)}</div>)
+          <ul>
+            {eventListInfo.map(element => <li>{settings.format(element)}</li>)}
+          </ul>
         }
       </div>
     );
