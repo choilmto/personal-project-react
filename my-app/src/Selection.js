@@ -1,11 +1,12 @@
 import React from 'react';
+import { eventFilter } from './AppProps';
 
-const Selection = ({ eventFilter, val, unselect }) =>
+const Selection = ({ selection, unselect }) =>
   (
     <div>
       {eventFilter.map((element) =>
         [<input type="radio"
-          checked={val=== element.githubEventName}
+          checked={selection=== element.githubEventName}
           onChange={() => unselect(element.githubEventName)}>
         </input>,
         <label>{element.radioLabel}</label>

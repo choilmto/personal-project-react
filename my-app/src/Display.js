@@ -1,24 +1,35 @@
-import React from 'react';
+import React, { Component } from 'react';
 import EventList from './EventList';
 import { Selection } from './Selection';
 
-const Display = ({ username, eventFilter, unselect, val, eventVal }) =>
-  (
-    <div>
-      <h1>{`${username}'s Github account`}</h1>
-      <Selection eventFilter={eventFilter}
-        unselect={unselect}
-        val={val}
-      />
+class Display extends Component {
+  constructor(props) {
+    super(props);
+  }
 
-      {eventVal ?
-        <EventList
-          eventListInfo={eventVal.data}
-          title={eventVal.title}
-          format={eventVal.format}/>:
-        <div>Waiting for information from Github</div>
-      }
-    </div>
-  );
+  componentDidMount () {
+    this.props.setData(this.props.username);
+  }
+
+  render() {
+    let props = this.props;
+    return (
+      <div>
+        <h1>{`${props.username}'s Github account`}</h1>
+        <Selection
+          unselect={props.unselect}
+          selection={props.selection}
+        />
+
+        {props.eventListInfo ?
+          <EventList
+            eventListInfo={props.eventListInfo}
+            selection={props.selection}/>:
+          <div>Waiting for information from Github</div>
+        }
+      </div>
+    );
+  }
+}
 
 export { Display };

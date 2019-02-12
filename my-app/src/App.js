@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
-import { reduceCallback, destructureEvents } from './AppProps';
+import { getReduceCallback, destructureEvents, token, eventFilter } from './AppProps';
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      val: "",
+      selection: "",
       username: "",
       usernameMessage: ""
     };
@@ -16,74 +16,78 @@ class App extends Component {
 
   componentDidMount() {
     try {
-      this.setState({val: this.props.eventFilter[0].githubEventName});
+      this.setState({selection: this.props.eventFilter[0].githubEventName});
     } catch (err) {
       console.error("eventFilter is an empty array.", err);
     }
   }
 
-  handleFetchError = (response, msg) => {
-    if (!response.ok) {
-      this.setState({usernameMessage: msg});
-      throw Error(response.statusText);
-    }
+  convertStringToFetch = (url) =>
+    fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      return response.json();
+  })
+
+  fetchEndpoints = (allEndpoints) =>
+    Promise.all(allEndpoints.map(element => this.convertStringToFetch(element)))
+
+  setUsername = username  => {
+     this.convertStringToFetch(`https://api.github.com/users/${username}${token}`)
+     .then(() => this.setState({username}))
+     .catch((error) => {
+       this.setState({usernameMessage: "Check username"});
+       console.error(error);
+     });
   }
 
-  setUsername = username => {
+  setData = username => {
     //returns a promise with an array of values
-    Promise.all([
-      `https://api.github.com/users/${username}/events`,
-      `https://api.github.com/users/${username}/repos`
-    ].map(element =>
-      fetch(element)
-        .then(response => {
-          this.handleFetchError(response, "Check username");
-          return response.json();
-        }).catch(error => console.error("Fetch error.", error))
-      )).then(responseArr => {
-
+    this.fetchEndpoints([
+      `https://api.github.com/users/${username}/events${token}`,
+      `https://api.github.com/users/${username}/repos${token}`
+    ])
+    .then(responseArr => {
+      console.log(responseArr);
       //destructure events endpoint for each event
-      let events = this.props.eventFilter.reduce(reduceCallback.bind(
-        null, responseArr[0], destructureEvents), {});
-
+      let events = eventFilter.reduce(getReduceCallback(responseArr[0]), {});
       //destructure repos endpoint for each event
-      if(events.ForkEvent.data.length === 0) {
-        events.ForkEvent.data = responseArr[1].filter(element => element.fork)
-          .map((element) => element.name);
+      if(events.ForkEvent.length === 0) {
+        events.ForkEvent = responseArr[1]
+          .filter(element => element.fork)
+          .map((element) => ({repo: element.name}));
       }
 
       //fetch all pull requests listed and mutate events object
-      Promise.all(events.PullRequestEvent.data.map(element =>
-        fetch(element.JSONUrl)
-          .then(response => {
-            this.handleFetchError(response, "Check username");
-            return response.json();
-        }).catch(error => console.error("Fetch error.", error))
-      )).then(response => {
-        events.PullRequestEvent.data.forEach((element, index) =>
-         element.status = response[index].state);
-       this.setState({
-         username: username,
-         ...events
-       });
-     });
+      this.fetchEndpoints(events.PullRequestEvent
+        .map(element => element.JSONUrl))
+      .then(response => {
+        events.PullRequestEvent = events.PullRequestEvent.map((element, index) => ({
+          ...element,
+          status : response[index].state
+        }));
+        this.setState({...events});})
+      .catch((error) => console.error(error));
     });
   }
 
   unselect = name => {
-    this.setState({val: name});
+    this.setState({selection: name});
   }
 
   render() {
     let state = this.state;
+    let username = state.username;
     return (
       <div>
-        {state.username ?
-          <Display username={state.username}
-            eventFilter={this.props.eventFilter}
+        {username ?
+          <Display username={username}
+            setData={this.setData}
             unselect={this.unselect}
-            val={state.val}
-            eventVal={state[state.val]}
+            selection={state.selection}
+            eventListInfo={state[state.selection]}
           /> :
           <Login setUsername={this.setUsername}
             usernameMessage={state.usernameMessage}/>
