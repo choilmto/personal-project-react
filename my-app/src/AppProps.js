@@ -1,6 +1,5 @@
 import React from 'react';
-
-export const token = '';
+import { token } from './AccessToken';
 
 const mapFork = (element) =>
   ({

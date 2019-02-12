@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
-import { getReduceCallback, token, eventFilter } from './AppProps';
+import { getReduceCallback, eventFilter } from './AppProps';
+import { token } from './AccessToken';
 
 class App extends Component {
   constructor(props) {

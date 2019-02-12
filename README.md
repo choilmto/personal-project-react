@@ -1,1 +1,1 @@
-You can enter your github personal API token in AppProps.js, in the token variable.
+You can enter your github personal API token in AccesToken.js, in the token variable.
