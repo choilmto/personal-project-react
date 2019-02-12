@@ -50,7 +50,6 @@ class App extends Component {
       `https://api.github.com/users/${username}/repos${token}`
     ])
     .then(responseArr => {
-      console.log(responseArr);
       //destructure events endpoint for each event
       let events = eventFilter.reduce(getReduceCallback(responseArr[0]), {});
       //destructure repos endpoint for each event
