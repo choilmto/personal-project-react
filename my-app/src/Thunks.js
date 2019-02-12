@@ -1,6 +1,6 @@
-import { eventFilter, getReduceCallback } from './AppProps';
-import { fetchDataBegin, fetchDataSuccess, fetchDataFailure } from './DataReducer';
-import { fetchUsernameBegin, fetchUsernameSuccess, fetchUsernameFailure } from './UsernameReducer';
+import { eventFilter, getReduceCallback, token } from './AppProps';
+import { fetchDataBegin, fetchDataSuccess, fetchDataFailure } from './DataReducerAndActions';
+import { fetchUsernameBegin, fetchUsernameSuccess, fetchUsernameFailure } from './UsernameReducerAndActions';
 
 const convertStringToFetch = (url) =>
   fetch(url)
@@ -10,7 +10,6 @@ const convertStringToFetch = (url) =>
     }
     return response.json();
   })
-  .catch(() => "Check username")
 
 const fetchEndpoints = (allEndpoints) =>
   Promise.all(allEndpoints.map(element => convertStringToFetch(element)))
@@ -19,17 +18,18 @@ const fetchEndpoints = (allEndpoints) =>
 export const fetchUsernameThunk = (username) => {
   return (dispatch) => {
     dispatch(fetchUsernameBegin());
-    convertStringToFetch(`https://api.github.com/users/${username}`)
-    .then(() => dispatch(fetchUsernameSuccess(username)))
-    .catch((error) => dispatch(fetchUsernameFailure(error)));
+    let resolve = () => dispatch(fetchUsernameSuccess(username));
+    let reject = (error) => dispatch(fetchUsernameFailure("Check username"));
+    convertStringToFetch(`https://api.github.com/users/${username}${token}`)
+    .then(resolve, reject);
   }
 }
 
 export const fetchDataThunk = (username) => {
   return (dispatch) => {
     dispatch(fetchDataBegin());
-    fetchEndpoints([`https://api.github.com/users/${username}/events`,
-      `https://api.github.com/users/${username}/repos`])
+    fetchEndpoints([`https://api.github.com/users/${username}/events${token}`,
+      `https://api.github.com/users/${username}/repos${token}`])
     .then(responseArr => {
     //destructure events endpoint for each event
       let events = eventFilter
@@ -39,19 +39,27 @@ export const fetchDataThunk = (username) => {
       if(events.ForkEvent.length === 0) {
         events.ForkEvent = responseArr[1]
           .filter(element => element.fork)
-          .map((element) => element.name);
+          .map((element) => ({repo: element.name}));
       }
 
       //fetch all pull requests listed and mutate events object
       return fetchEndpoints(events.PullRequestEvent
         .map(element => element.JSONUrl))
       .then(response => {
-        events.PullRequestEvent.forEach((element, index) =>
-          element.status = response[index].state);
-
+        events.PullRequestEvent = events.PullRequestEvent.map((element, index) => ({
+          ...element,
+          status : response[index].state
+        }));
         dispatch(fetchDataSuccess(events));
-      });
+      })
+      .catch((error) => {
+        console.error("Check pull request endpoints");
+        dispatch(fetchDataFailure(error));
+      })
     })
-    .catch((error) => dispatch(fetchDataFailure(error)));
+    .catch((error) => {
+      console.error("Check outer promise endpoint");
+      dispatch(fetchDataFailure(error))}
+    );
   };
 }

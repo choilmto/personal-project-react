@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import { rootReducer } from './RootReducer';
-import { setSelection } from './SelectionReducer';
+import { setSelection } from './SelectionReducerAndActions';
 import { fetchDataThunk, fetchUsernameThunk } from './Thunks';
 import * as serviceWorker from './serviceWorker';
 import { createStore, applyMiddleware } from 'redux';
@@ -12,13 +12,13 @@ import thunk from 'redux-thunk';
 
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
-let currentValue;
+let currentUsername;
 const setData = () => {
-  let previousValue = currentValue;
-  currentValue = store.getState().user.username;
+  let previousUsername = currentUsername;
+  currentUsername = store.getState().user.username;
 
-  if (previousValue !== currentValue) {
-    store.dispatch(fetchDataThunk(currentValue));
+  if ((currentUsername !== "") && (previousUsername !== currentUsername)) {
+    store.dispatch(fetchDataThunk(currentUsername));
   }
 };
 

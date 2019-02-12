@@ -11,6 +11,7 @@ class App extends Component {
   render() {
     let props = this.props;
     let username = props.username;
+    
     return (
       <div>
         {username ?

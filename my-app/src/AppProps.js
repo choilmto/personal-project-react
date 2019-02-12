@@ -1,5 +1,8 @@
 import React from 'react';
 
+//for testing
+export const token = "";
+
 const mapFork = (element) =>
   ({
     id: element.id,
@@ -12,10 +15,11 @@ const mapPR = (element) =>
     id: element.id,
     title: element.payload.pull_request.title,
     link: element.payload.pull_request.html_url,
-    JSONUrl: `${element.payload.pull_request.url}`
+    JSONUrl: `${element.payload.pull_request.url}${token}`
   })
 
-const formatFork = item => <a href={item.baseUrl} target="_blank">{item.repo}</a>;
+const formatFork = item =>
+  <a href={item.baseUrl} target="_blank">{item.repo}</a>
 
 const formatPR = item => <a href={item.link} target="_blank">
   {`${item.status[0].toUpperCase()} ${item.title}`}</a>
