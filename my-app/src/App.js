@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { Display } from './Display';
 import { Login } from './Login';
-import { getReduceCallback, destructureEvents, token, eventFilter } from './AppProps';
+import { getReduceCallback, token, eventFilter } from './AppProps';
 
 class App extends Component {
   constructor(props) {

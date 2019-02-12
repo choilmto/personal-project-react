@@ -3,10 +3,6 @@ import EventList from './EventList';
 import { Selection } from './Selection';
 
 class Display extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   componentDidMount () {
     this.props.setData(this.props.username);
   }
